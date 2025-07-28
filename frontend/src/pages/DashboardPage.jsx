@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Modal from '../components/Modal';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -11,6 +11,9 @@ export default function DashboardPage({ token }) {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState(null);
   const [medicineToDelete, setMedicineToDelete] = useState(null);
+  
+  // --- NEW: State for the search term ---
+  const [searchTerm, setSearchTerm] = useState('');
 
   const formatDateForInput = (isoString) => isoString ? new Date(isoString).toISOString().split('T')[0] : '';
 
@@ -33,6 +36,7 @@ export default function DashboardPage({ token }) {
 
   const handleSaveMedicine = async (e) => {
     e.preventDefault();
+    // ... (rest of the function is unchanged)
     const formData = new FormData(e.target);
     const medicineData = Object.fromEntries(formData.entries());
     medicineData.quantity = parseInt(medicineData.quantity, 10);
@@ -53,6 +57,7 @@ export default function DashboardPage({ token }) {
   };
 
   const handleDeleteMedicine = async () => {
+    // ... (rest of the function is unchanged)
     if (!medicineToDelete) return;
     try {
       const response = await fetch(`${API_BASE_URL}/medicines/${medicineToDelete._id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
@@ -68,6 +73,13 @@ export default function DashboardPage({ token }) {
   const showEditForm = (medicine) => { setEditingMedicine(medicine); setIsFormVisible(true); };
   const closeForm = () => { setIsFormVisible(false); setEditingMedicine(null); };
 
+  // --- NEW: Filter medicines based on the search term ---
+  const filteredMedicines = useMemo(() => {
+    return medicines.filter(med => 
+      med.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [medicines, searchTerm]);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -80,13 +92,24 @@ export default function DashboardPage({ token }) {
             </div>
         </header>
         <main>
-          <div className="flex justify-end mb-4 gap-4">
-            <button onClick={showAddForm} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+            {/* --- NEW: Search Input --- */}
+            <div className="w-full sm:w-auto sm:max-w-xs">
+              <input 
+                type="text"
+                placeholder="Search medicines..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button onClick={showAddForm} className="w-full sm:w-auto bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
               + Add New Medicine
             </button>
           </div>
           {isFormVisible && (
             <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
+              {/* Form content remains the same */}
               <h2 className="text-2xl font-bold mb-4">{editingMedicine ? 'Edit Medicine' : 'Add New Medicine'}</h2>
               <form onSubmit={handleSaveMedicine}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -99,7 +122,7 @@ export default function DashboardPage({ token }) {
               </form>
             </div>
           )}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden"><div className="overflow-x-auto"><table className="min-w-full divide-y divide-gray-200"><thead className="bg-gray-50"><tr><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th></tr></thead><tbody className="bg-white divide-y divide-gray-200">{isLoading ? (<tr><td colSpan="5"><LoadingSpinner message="Loading medicines..." /></td></tr>) : medicines.length > 0 ? (medicines.map(med => (<tr key={med._id} className="hover:bg-gray-50"><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{med.name}</td><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateForInput(med.expiryDate)}</td><td className={`px-2 sm:px-6 py-4 whitespace-nowrap text-sm ${med.quantity <= 10 ? 'text-red-600 font-bold' : 'text-gray-500'}`}>{med.quantity}</td><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">${med.price.toFixed(2)}</td><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2"><button onClick={() => showEditForm(med)} className="text-indigo-600 hover:text-indigo-900">Edit</button><button onClick={() => setMedicineToDelete(med)} className="text-red-600 hover:text-red-900">Delete</button></td></tr>))) : (<tr><td colSpan="5" className="text-center p-8 text-gray-500">No medicines found.</td></tr>)}</tbody></table></div></div>
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden"><div className="overflow-x-auto"><table className="min-w-full divide-y divide-gray-200"><thead className="bg-gray-50"><tr><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th><th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th></tr></thead><tbody className="bg-white divide-y divide-gray-200">{isLoading ? (<tr><td colSpan="5"><LoadingSpinner message="Loading medicines..." /></td></tr>) : filteredMedicines.length > 0 ? (filteredMedicines.map(med => (<tr key={med._id} className="hover:bg-gray-50"><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{med.name}</td><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateForInput(med.expiryDate)}</td><td className={`px-2 sm:px-6 py-4 whitespace-nowrap text-sm ${med.quantity <= 10 ? 'text-red-600 font-bold' : 'text-gray-500'}`}>{med.quantity}</td><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">${med.price.toFixed(2)}</td><td className="px-2 sm:px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2"><button onClick={() => showEditForm(med)} className="text-indigo-600 hover:text-indigo-900">Edit</button><button onClick={() => setMedicineToDelete(med)} className="text-red-600 hover:text-red-900">Delete</button></td></tr>))) : (<tr><td colSpan="5" className="text-center p-8 text-gray-500">No medicines found{searchTerm && ' matching your search'}.</td></tr>)}</tbody></table></div></div>
         </main>
         {error && (<Modal onClose={() => setError(null)}><h3 className="text-lg font-bold text-red-600">An Error Occurred</h3><div className="mt-4 text-sm text-gray-700 whitespace-pre-wrap bg-red-50 p-4 rounded-md">{error}</div></Modal>)}
         {medicineToDelete && (<Modal onClose={() => setMedicineToDelete(null)}><h3 className="text-lg font-bold text-gray-900">Confirm Deletion</h3><p className="mt-2 text-sm text-gray-600">Are you sure you want to delete "{medicineToDelete.name}"?</p><div className="mt-6 flex justify-end space-x-3"><button onClick={() => setMedicineToDelete(null)} className="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">Cancel</button><button onClick={handleDeleteMedicine} className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-700">Delete</button></div></Modal>)}
