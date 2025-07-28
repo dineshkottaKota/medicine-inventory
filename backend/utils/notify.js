@@ -14,6 +14,7 @@ async function notifyInventoryIssues(db) {
     expiryDate: { $lte: new Date(now.getTime() + NEAR_EXPIRY_DAYS * 24 * 60 * 60 * 1000) }
   }).toArray();
   const outOfStock = await medicines.find({ quantity: { $lte: 0 } }).toArray();
+  console.log(outOfStock);
   let message = '';
   if (outOfStock.length > 0) {
     message += 'Out of stock medicines:\n' + outOfStock.map(m => m.name).join(', ') + '\n';
@@ -22,6 +23,7 @@ async function notifyInventoryIssues(db) {
     message += 'Near expiry medicines (within 30 days):\n' + nearExpiry.map(m => m.name).join(', ') + '\n';
   }
   if (message) {
+    console.log(message);
     await sendEmail(owner.email, 'Medicine Inventory Alert', message);
   }
 }
