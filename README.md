@@ -136,5 +136,3 @@ npm run dev
 5. Deploy and enjoy!
 
 ---
-
-Let me know if you'd like a **PDF version**, custom branding, or project logo added!
