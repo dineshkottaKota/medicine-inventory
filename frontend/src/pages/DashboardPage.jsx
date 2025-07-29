@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Modal from '../components/Modal';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://medicine-inventory-backend-rkud.onrender.com/api';
 
 export default function DashboardPage({ token }) {
   const [medicines, setMedicines] = useState([]);
