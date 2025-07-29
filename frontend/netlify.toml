@@ -1,0 +1,5 @@
+# This rule fixes the "Page Not Found" error on refresh
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
