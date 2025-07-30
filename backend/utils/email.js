@@ -56,6 +56,7 @@ async function sendEmail(to, subject, text) {
       to: to, // list of receivers
       subject: subject, // Subject line
       text: text, // plain text body
+      ...(html && { html }),
     };
 
     // Send mail with defined transport object
