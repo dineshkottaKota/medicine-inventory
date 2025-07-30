@@ -26,7 +26,7 @@ MongoClient.connect(MONGO_URI)
     app.use('/api/sales', salesRoutes);
 
     // Schedule daily notification job
-    cron.schedule('10 8 * * *', async () => {
+    cron.schedule('41 9 * * *', async () => {
       try {
         await notifyInventoryIssues(db);
         console.log('Inventory notification sent');
