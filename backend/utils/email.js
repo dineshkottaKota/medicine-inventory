@@ -41,7 +41,7 @@ const transporter = nodemailer.createTransport({
  * @param {string} subject - The subject of the email.
  * @param {string} text - The plain text body of the email.
  */
-async function sendEmail(to, subject, text) {
+async function sendEmail(to, subject, text,html = null) {
   // Check if credentials are loaded
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.error('Email credentials not found in .env file. Skipping email send.');
