@@ -6,7 +6,7 @@ This project presents a complete **MERN stack** (MongoDB, Express, React, Node.j
 
 With a responsive UI and role-based dashboards, the system enables seamless inventory control, streamlined multi-item sales, and detailed analytics. A standout feature is the **automated daily inventory check**, which sends **email alerts** about low-stock and near-expiry medicines, helping prevent losses and improve business efficiency.
 
-🔗 **Live Frontend:** [medicine-inventory-frontend.netlify.app](https://medicine-inventory-frontend.netlify.app/)
+🔗 **Live Frontend:** [medicine-inventory-frontend.netlify.app](https://trackmymeds.netlify.app/)
 
 ---
 
