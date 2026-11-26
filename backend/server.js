@@ -13,8 +13,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/medicine_inventory';
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
 app.use(cors());
 app.use(express.json());
+// parse cookies for csurf and use cookie-based CSRF protection
+app.use(cookieParser());
+app.use(csurf({ cookie: true }));
+// provide CSRF token to clients (safe GET endpoint)
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 let db;
 MongoClient.connect(MONGO_URI)
